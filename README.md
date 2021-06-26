@@ -31,6 +31,10 @@ Step 1: Running the Frontend Server
 ```
 cd frontend
 
+#Install Packages
+
+npm install
+
 # Development
 npm start
 
@@ -41,6 +45,10 @@ npm run build
 Step 2: Running the Backend Server
 ```
 cd backend
+
+#Install Packages
+
+npm install
 
 # Development
 npm run start
