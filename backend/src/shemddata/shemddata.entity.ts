@@ -10,7 +10,7 @@ export class ShemdData {
   //  @Field(type => Int)
   //   id: number;
 
-  @Column("text", { name: "Serial_Number" })
+  @PrimaryColumn("text", { name: "Serial_Number" })
   @Field()
   serialNumber: string | null;
 
@@ -20,7 +20,7 @@ export class ShemdData {
   @Field()
   dateTime: Date | null;
 
-  @Column("text", { name: "Device_ID"})
+  @PrimaryColumn("text", { name: "Device_ID"})
   @Field({ nullable: true })
   deviceId: string | null;
 

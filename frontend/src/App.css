@@ -12,12 +12,9 @@
   width: 75%;
 }
 
-.mainContainer{
-}
 
-.buttonContainer{
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.logo{
+  position:fixed; 
+	top:30px; 
+	left:30px; 
 }
-

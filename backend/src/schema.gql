@@ -21,9 +21,10 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Query {
-  filterBother(deviceId: String!, serialNumber: String!): [ShemdData!]!
+  filterBoth(deviceId: String!, serialNumber: String!): [ShemdData!]!
   filterSerialNumber(serialNumber: String!): [ShemdData!]!
   getAllSerialNumbers: [ShemdData!]!
+  getAllDeviceId: [ShemdData!]!
   filterDeviceId(deviceId: String!): [ShemdData!]!
   shemddata: [ShemdData!]!
 }

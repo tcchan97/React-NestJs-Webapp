@@ -8,8 +8,8 @@ export class ShemddataResolver {
 
 
   @Query(returns => [ShemdData])
-  filterBother(@Args("serialNumber", { type: () => String })serialNumber: string, @Args("deviceId", { type: () => String }) deviceId:string) : Promise<ShemdData[]> {
-    return this.shemddataService.filterBother(serialNumber,deviceId)
+  filterBoth(@Args("serialNumber", { type: () => String })serialNumber: string, @Args("deviceId", { type: () => String }) deviceId:string) : Promise<ShemdData[]> {
+    return this.shemddataService.filterBoth(serialNumber,deviceId)
   }
 
   @Query(returns => [ShemdData])
@@ -19,10 +19,12 @@ export class ShemddataResolver {
 
   @Query(returns => [ShemdData])
   getAllSerialNumbers(): Promise<ShemdData[]> {
-    const data = this.shemddata();
-    const serialNumbers = [];
-    console.log(data);
-    return data;
+    return this.shemddataService.findAllSerialNumbers();
+  }
+
+  @Query(returns => [ShemdData])
+  getAllDeviceId(): Promise<ShemdData[]> {
+    return this.shemddataService.findAllDeviceId();
   }
 
   @Query(returns => [ShemdData])

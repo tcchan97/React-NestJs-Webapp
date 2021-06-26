@@ -12,11 +12,20 @@ export class ShemddataService {
     return this.shemddataRepository.find();
   }
 
-  async findAllofOne(serialNumber: string): Promise<ShemdData[]> {
-    return this.shemddataRepository.find({ serialNumber: serialNumber });
+  // async findAllofOne(serialNumber: string): Promise<ShemdData[]> {
+  //   return this.shemddataRepository.find({ serialNumber: serialNumber });
+  // }
+  //distinctOn(["readings.serialNumber"]);
+
+  findAllSerialNumbers(): any {
+    return this.shemddataRepository.createQueryBuilder("readings").select().distinctOn(["readings.serialNumber"]).getMany();
   }
 
-  async filterBother(serialNumber: string, deviceId: string): Promise<ShemdData[]> {
+  findAllDeviceId(): any {
+    return this.shemddataRepository.createQueryBuilder("readings").select().distinctOn(["readings.deviceId"]).getMany();
+  }
+
+  async filterBoth(serialNumber: string, deviceId: string): Promise<ShemdData[]> {
     return this.shemddataRepository.find(
       {
         where:
@@ -51,11 +60,11 @@ export class ShemddataService {
   }
 
 
-  async getAllbySerialNumberAndDeviceId(serialNumber: string, deviceId: string): Promise<ShemdData[]> {
-    return this.shemddataRepository.find({ serialNumber: serialNumber, deviceId: deviceId });
-  }
+  // async getAllbySerialNumberAndDeviceId(serialNumber: string, deviceId: string): Promise<ShemdData[]> {
+  //   return this.shemddataRepository.find({ serialNumber: serialNumber, deviceId: deviceId });
+  // }
 
-  findOne(serialNumber: string): Promise<ShemdData> {
-    return this.shemddataRepository.findOne(serialNumber);
-  }
+  // findOne(serialNumber: string): Promise<ShemdData> {
+  //   return this.shemddataRepository.findOne(serialNumber);
+  // }
 }
