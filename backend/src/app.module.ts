@@ -15,30 +15,24 @@ import { ShemddataModule } from './shemddata/shemddata.module';
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
     }),
-    // TypeOrmModule.forRoot({
-    //   type:'postgres',
-    //   host: ConfigService.get('HOST'),
-    //   port: 5432,
-    //   username: 'smarthomesdashboarduser@smarthomes',
-    //   password: "b5zT;q_fS{\a}AUtpD",
-    //   database: 'wattage',
-    //   ssl: true,
-    //   entities: ['dist/**/*.entity{.ts,.js}'],
-    //   synchronize:true,
-    // }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get('HOST'),
         port: +configService.get<number>('PORT'),
-        username: "smarthomesdashboarduser@smarthomes",
+        username: configService.get('USER'),
         password: configService.get('PASSWORD'),
         database: configService.get('DATABASE'),
         ssl: true,
         //entities: ['dist/**/*.entity{.ts,.js}'],
         autoLoadEntities: true,
         synchronize: true,
+        //Use this when setting up for production - Its only set for development mode currently
+        // synchronize: false,
+        // migrations: ["dist/migrations/*{.ts,.js}"],
+        // migrationsTableName: "migrations_typeorm",
+        // migrationsRun: true
       }),
       inject: [ConfigService],
     }),

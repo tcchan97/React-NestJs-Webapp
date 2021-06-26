@@ -23,8 +23,8 @@ scalar DateTime
 type Query {
   filterBoth(deviceId: String!, serialNumber: String!): [ShemdData!]!
   filterSerialNumber(serialNumber: String!): [ShemdData!]!
+  filterDeviceId(deviceId: String!): [ShemdData!]!
   getAllSerialNumbers: [ShemdData!]!
   getAllDeviceId: [ShemdData!]!
-  filterDeviceId(deviceId: String!): [ShemdData!]!
   shemddata: [ShemdData!]!
 }

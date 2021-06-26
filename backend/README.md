@@ -32,6 +32,17 @@
 $ npm install
 ```
 
+**Important**
+Create a .env file in the root of */backend* folder, file should look like.
+```
+HOST='hostname'
+PORT=port number
+USER="username"
+PASSWORD='password'
+DATABASE='db name'
+```
+App Is currently not setup for production as migrations has not been setup yet.
+
 ## Running the app
 
 ```bash

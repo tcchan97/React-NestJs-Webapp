@@ -7,24 +7,22 @@ import { ShemdData } from './shemddata.entity';
 export class ShemddataService {
   constructor(@InjectRepository(ShemdData) private shemddataRepository: Repository<ShemdData>) { }
 
-
+  // Query that gets all data
   async findAll(): Promise<ShemdData[]> {
     return this.shemddataRepository.find();
   }
 
-  // async findAllofOne(serialNumber: string): Promise<ShemdData[]> {
-  //   return this.shemddataRepository.find({ serialNumber: serialNumber });
-  // }
-  //distinctOn(["readings.serialNumber"]);
-
+  // Query that gets all Distinct Serial Numbers
   findAllSerialNumbers(): any {
     return this.shemddataRepository.createQueryBuilder("readings").select().distinctOn(["readings.serialNumber"]).getMany();
   }
 
+  // Query that gets all Distinct Device Numbers
   findAllDeviceId(): any {
     return this.shemddataRepository.createQueryBuilder("readings").select().distinctOn(["readings.deviceId"]).getMany();
   }
 
+  // Query that gets all results based on serial number and device ID
   async filterBoth(serialNumber: string, deviceId: string): Promise<ShemdData[]> {
     return this.shemddataRepository.find(
       {
@@ -37,6 +35,7 @@ export class ShemddataService {
     );
   }
 
+  // Query that gets all results based on serial number 
   async filterSerialNumber(serialNumber: string): Promise<ShemdData[]> {
     return this.shemddataRepository.find(
       {
@@ -48,6 +47,7 @@ export class ShemddataService {
     );
   }
 
+  // Query that gets all results based on device ID
   async filterDeviceId( deviceId: string): Promise<ShemdData[]> {
     return this.shemddataRepository.find(
       {
@@ -58,13 +58,4 @@ export class ShemddataService {
       }
     );
   }
-
-
-  // async getAllbySerialNumberAndDeviceId(serialNumber: string, deviceId: string): Promise<ShemdData[]> {
-  //   return this.shemddataRepository.find({ serialNumber: serialNumber, deviceId: deviceId });
-  // }
-
-  // findOne(serialNumber: string): Promise<ShemdData> {
-  //   return this.shemddataRepository.findOne(serialNumber);
-  // }
 }

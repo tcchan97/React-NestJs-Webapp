@@ -5,16 +5,23 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { useQuery, gql, useLazyQuery } from '@apollo/client';
+import { useQuery, useLazyQuery } from '@apollo/client';
 import { LOAD_DATA, All_DeviceId, All_SerialNumbers, LOAD_SN, LOAD_DI, LOAD_SN_DI } from "../queries/Queries";
 import moment from 'moment';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import './Chart.css';
 
+
+/*
+------------------------------------------------------------------------------------
+VARIABLES
+------------------------------------------------------------------------------------
+*/
+// Creating the state variable for the chart module.
 const state = {
   labels: [] as any,
   datasets: [] as any,
-  options: {
+  options: { //This isnt showing for some reason.
     title: {
       display: true,
       text: 'Wattage vs Time for electrical consumption for a group of homes ',
@@ -25,7 +32,7 @@ const state = {
         type: 'time',
         time: {
           unit: 'hour',
-          stepSize: 3, // I'm using 3 hour intervals here
+          stepSize: 3, 
           tooltipFormat: 'HH:mm',
         },
         ticks: {
@@ -47,49 +54,15 @@ const state = {
   }
 }
 
-const legend = {
-  display: true,
-  position: 'right'
-};
-
-const options = {
-  title: {
-    display: true,
-    text: 'Wattage vs Time for electrical consumption for a group of homes ',
-    fontSize: 20
-  },
-  scales: {
-    xAxes: [{
-      type: 'time',
-      time: {
-        unit: 'hour',
-        stepSize: 3, 
-        tooltipFormat: 'HH:mm',
-      },
-      ticks: {
-        major: {
-          enabled: true,
-          fontStyle: 'bold', 
-          fontSize: 14 
-        },
-      },
-    }],
-    yAxes: [{
-      display: true,
-      scaleLabel: {
-        display: true,
-        labelString: 'Value'
-      },
-    }]
-  }
-};
 
 
 export const Chart: React.FC = () => {
 
-
-  const DIData = useQuery(All_DeviceId);
-  const SNData = useQuery(All_SerialNumbers);
+  /*
+  ------------------------------------------------------------------------------------
+  VARIABLES
+  ------------------------------------------------------------------------------------
+  */
 
   const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -102,7 +75,8 @@ export const Chart: React.FC = () => {
       },
     }),
   );
-
+  const DIData = useQuery(All_DeviceId);
+  const SNData = useQuery(All_SerialNumbers);
   const classes = useStyles();
   const [serialNumberMenu, setSerialNumberMenu] = React.useState([]);
   const [serialNumberFilter, setSerialNumberFilter] = React.useState<String>("None");
@@ -113,17 +87,22 @@ export const Chart: React.FC = () => {
   const [filterSelected, setFilterSelected] = React.useState<any>();
   const [loadingGraph, setLoadingGraph] = React.useState(false);
   const [loadingData, setLoadingData] = React.useState(false);
-
-  const [allData, { called, loading, data }] = useLazyQuery(
+  const [allData, { data }] = useLazyQuery(
     filterSelected, {
     variables: { serialNumber: serialNumberFilter, deviceId: deviceIdFilter },
   }
   );
 
+  /*
+  ------------------------------------------------------------------------------------
+  FUNCTIONS
+  ------------------------------------------------------------------------------------
+  */
+ //Handles when theres a change in the serial number drop down
   const handleChangeSN = (event: React.ChangeEvent<{ value: unknown }>) => {
     setSerialNumberFilter(event.target.value as string);
     if (filterSelected === LOAD_DI) {
-      if (event.target.value != "All") {
+      if (event.target.value !== "All") {
         setFilterSelected(LOAD_SN_DI);
       }
       setFilterSelectedSN("SN");
@@ -151,12 +130,12 @@ export const Chart: React.FC = () => {
     }
     setLoadingGraph(false);
   };
-
+  //Handles when theres a change in the device ID drop down
   const handleChangeDI = (event: React.ChangeEvent<{ value: unknown }>) => {
     setdeviceIdFilter(event.target.value as string);
 
     if (filterSelected === LOAD_SN) {
-      if (event.target.value != "All") {
+      if (event.target.value !== "All") {
         setFilterSelected(LOAD_SN_DI);
       }
       setFilterSelectedDI("DI");
@@ -185,16 +164,66 @@ export const Chart: React.FC = () => {
     setLoadingGraph(false);
   };
 
+  //function that gets the data formatted for the linechart.
+  function refactorData(data: any) {
+    for (let i = 0; i < state.datasets.length; i++) {
+      state.datasets[i].data = [] as any;
+    }
+    state.labels = [];
+
+    var dataType = '' as any;
+    if (filterSelected === LOAD_DATA) {
+      dataType = data.shemddata;
+    }
+    else if (filterSelected === LOAD_SN) {
+      dataType = data.filterSerialNumber;
+    }
+    else if (filterSelected === LOAD_DI) {
+      dataType = data.filterDeviceId;
+    }
+    else if (filterSelected === LOAD_SN_DI) {
+      dataType = data.filterBoth;
+    }
+    // console.log("data before", data);
+    // console.log("datatype", dataType);
+    try{
+      for (let i = 0; i < dataType.length; i++) {
+
+        for (let j = 0; j < state.datasets.length; j++) {
+        
+          if (state.datasets[j].label === dataType[i].serialNumber) {
+  
+            const values = {
+              y: parseFloat(dataType[i].wattage),
+              x: moment(dataType[i].dateTime).format('h:mm a')
+            }
+            state.datasets[j].data?.push(values)
+  
+          }
+        }
+      }
+      setLoadingGraph(true);
+
+    }
+    catch{
+      console.log("failed to get Data")
+    }
+
+  }
+
+  /*
+  ------------------------------------------------------------------------------------
+  USEEFFECTS
+  ------------------------------------------------------------------------------------
+  */
+  //Watches for changes on the distinct Serial Number values and adds it into the state variable and creates the drop down items
   useEffect(() => {
-    //console.log(data);
     var menuSerialNumber = [] as any;
     menuSerialNumber.push(<MenuItem key="All" value="All"> All </MenuItem>)
     if (SNData.data) {
-      //console.log(SNData.data.getAllSerialNumbers);
       SNData.data.getAllSerialNumbers.map((value: any) =>
         menuSerialNumber.push(<MenuItem key={value.serialNumber} value={value.serialNumber}> {value.serialNumber} </MenuItem>)
       )
-
       SNData.data.getAllSerialNumbers.map((value: any) =>
         state.datasets.push({
           label: value.serialNumber,
@@ -214,6 +243,7 @@ export const Chart: React.FC = () => {
     console.log(state)
   }, [SNData])
 
+  //Watches for changes on the distinct Device ID values and creates menu items for the drop down.
   useEffect(() => {
     var menuDeviceId = [] as any;
     menuDeviceId.push(<MenuItem key="All" value="All"> All </MenuItem>)
@@ -226,65 +256,31 @@ export const Chart: React.FC = () => {
     }
   }, [DIData])
 
+  //Based on filter selected its calls to queries the data using apollo client.
   useEffect(() => {
-
-    if (filterSelected != undefined) {
+    if (filterSelected !== undefined) {
       allData();
     }
 
   }, [filterSelected])
 
-
+  //Once data is loaded, refactor it into state variable.
   useEffect(() => {
-    console.log(data);
-    console.log("DI filter ", filterSelectedDI);
-    console.log("SN filter ", filterSelectedSN);
+    // console.log(data);
+    // console.log("DI filter ", filterSelectedDI);
+    // console.log("SN filter ", filterSelectedSN);
     if (data) {
       refactorData(data);
     }
   }, [data])
 
-
-  function refactorData(data: any) {
-    for (let i = 0; i < state.datasets.length; i++) {
-      state.datasets[i].data = [] as any;
-    }
-    state.labels = [];
-
-    var dataType = '' as any;
-    if (filterSelected == LOAD_DATA) {
-      dataType = data.shemddata;
-    }
-    else if (filterSelected == LOAD_SN) {
-      dataType = data.filterSerialNumber;
-    }
-    else if (filterSelected == LOAD_DI) {
-      dataType = data.filterDeviceId;
-    }
-    else if (filterSelected == LOAD_SN_DI) {
-      dataType = data.filterBoth;
-    }
-    console.log("data before", data);
-    console.log("datatype", dataType);
-    for (let i = 0; i < dataType.length; i++) {
-
-      for (let j = 0; j < state.datasets.length; j++) {
-      
-        if (state.datasets[j].label === dataType[i].serialNumber) {
-
-          const values = {
-            y: parseFloat(dataType[i].wattage),
-            x: moment(dataType[i].dateTime).format('h:mm a')
-          }
-          state.datasets[j].data?.push(values)
-
-        }
-      }
-    }
-    console.log(state);
-    setLoadingGraph(true);
-  }
-
+  /*
+  ------------------------------------------------------------------------------------
+  RENDER
+  ------------------------------------------------------------------------------------
+  */
+  
+  //Only render the page if it has recieved the serialnumbers and device IDs for drop down menu
   if (loadingData) {
     return (
       <div className="mainContainer">
@@ -301,7 +297,6 @@ export const Chart: React.FC = () => {
               {serialNumberMenu}
             </Select>
           </FormControl>
-
           <FormControl variant="filled" className={classes.formControl}>
             <InputLabel >Device Id</InputLabel>
             <Select
@@ -331,14 +326,14 @@ export const Chart: React.FC = () => {
                   type: 'time',
                   time: {
                     unit: 'hour',
-                    stepSize: 3, // I'm using 3 hour intervals here
+                    stepSize: 3,
                     tooltipFormat: 'HH:mm',
                   },
                   ticks: {
                     major: {
-                      enabled: true, // <-- This is the key line
-                      fontStyle: 'bold', //You can also style these values differently
-                      fontSize: 14 //You can also style these values differently
+                      enabled: true,
+                      fontStyle: 'bold',
+                      fontSize: 14 
                     },
                   },
                 }],
